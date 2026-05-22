@@ -1,0 +1,23 @@
+{
+  "name": "TODO: flow name",
+  "enabled": true,
+  "trigger": {
+    "id": "TODO: trigger card id from get-flow-card-triggers",
+    "args": {}
+  },
+  "conditions": [
+    {
+      "id": "TODO: condition card id from get-flow-card-conditions",
+      "args": {},
+      "group": "group1",
+      "inverted": false
+    }
+  ],
+  "actions": [
+    {
+      "id": "TODO: action card id from get-flow-card-actions",
+      "args": {},
+      "group": "then"
+    }
+  ]
+}

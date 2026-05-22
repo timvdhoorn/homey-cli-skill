@@ -1,0 +1,53 @@
+{
+  "name": "TODO: flow name",
+  "enabled": true,
+  "cards": {
+    "00000000-0000-4000-8000-000000000001": {
+      "type": "start",
+      "x": 100,
+      "y": 100,
+      "outputSuccess": ["00000000-0000-4000-8000-000000000003"]
+    },
+    "00000000-0000-4000-8000-000000000002": {
+      "type": "trigger",
+      "id": "TODO: trigger card id from get-flow-card-triggers",
+      "args": {},
+      "x": 100,
+      "y": 400,
+      "outputSuccess": ["00000000-0000-4000-8000-000000000004"]
+    },
+    "00000000-0000-4000-8000-000000000003": {
+      "type": "delay",
+      "x": 400,
+      "y": 100,
+      "args": {
+        "delay": { "number": "5", "multiplier": 1 }
+      },
+      "outputSuccess": ["00000000-0000-4000-8000-000000000004"]
+    },
+    "00000000-0000-4000-8000-000000000004": {
+      "type": "all",
+      "x": 700,
+      "y": 250,
+      "input": [
+        "00000000-0000-4000-8000-000000000003::outputSuccess",
+        "00000000-0000-4000-8000-000000000002::outputSuccess"
+      ],
+      "outputSuccess": ["00000000-0000-4000-8000-000000000005"]
+    },
+    "00000000-0000-4000-8000-000000000005": {
+      "type": "action",
+      "id": "TODO: action card id from get-flow-card-actions",
+      "args": {},
+      "x": 1000,
+      "y": 250
+    },
+    "00000000-0000-4000-8000-000000000006": {
+      "type": "note",
+      "x": 100,
+      "y": 600,
+      "value": "TODO: replace this note. Notes decorate the flow but never execute.",
+      "color": "yellow"
+    }
+  }
+}

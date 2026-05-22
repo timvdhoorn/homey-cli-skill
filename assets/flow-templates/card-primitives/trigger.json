@@ -1,0 +1,8 @@
+{
+  "type": "trigger",
+  "id": "TODO: trigger card id from get-flow-card-triggers",
+  "args": {},
+  "x": 100,
+  "y": 200,
+  "outputSuccess": ["00000000-0000-4000-8000-000000000002"]
+}

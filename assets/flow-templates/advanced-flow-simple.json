@@ -1,0 +1,21 @@
+{
+  "name": "TODO: flow name",
+  "enabled": true,
+  "cards": {
+    "00000000-0000-4000-8000-000000000001": {
+      "type": "trigger",
+      "id": "TODO: trigger card id from get-flow-card-triggers",
+      "args": {},
+      "x": 100,
+      "y": 200,
+      "outputSuccess": ["00000000-0000-4000-8000-000000000002"]
+    },
+    "00000000-0000-4000-8000-000000000002": {
+      "type": "action",
+      "id": "TODO: action card id from get-flow-card-actions",
+      "args": {},
+      "x": 400,
+      "y": 200
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "type": "delay",
+  "x": 400,
+  "y": 200,
+  "args": {
+    "delay": {
+      "number": "5",
+      "multiplier": 1
+    }
+  },
+  "outputSuccess": ["00000000-0000-4000-8000-000000000002"]
+}

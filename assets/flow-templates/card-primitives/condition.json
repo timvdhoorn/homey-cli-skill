@@ -1,0 +1,11 @@
+{
+  "type": "condition",
+  "id": "TODO: condition card id from get-flow-card-conditions",
+  "args": {},
+  "inverted": false,
+  "x": 400,
+  "y": 200,
+  "outputTrue": ["00000000-0000-4000-8000-000000000003"],
+  "outputFalse": ["00000000-0000-4000-8000-000000000004"],
+  "outputError": []
+}
