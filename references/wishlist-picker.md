@@ -87,11 +87,19 @@ pathlib.Path('$SCREEN_DIR/wishlist.html').write_text(tpl.replace('__WISHLIST_DAT
 "
 ```
 
-### 4. Hand off to the user
+### 4. Wait for the submit event (auto-continue)
 
-Tell the user the URL, summarize what they'll see, and ask them to return to the terminal after Submit. End the turn.
+Tell the user the URL and what to do ("click priorities, then Submit"), then block until the submit event appears. Do **not** end the turn — the agent continues automatically as soon as the user clicks Submit.
 
-### 5. Read the result on the next turn
+Use `Monitor` (or `Bash` with `run_in_background: true`) on this until-loop:
+
+```bash
+until grep -q '"type":"submit"' "$STATE_DIR/events" 2>/dev/null; do sleep 2; done
+```
+
+The loop exits the moment the submit event is written to disk. The runtime notifies the agent and the next step runs.
+
+### 5. Read the result
 
 Read `$STATE_DIR/events` (JSONL). Take the **last** event of `type: "submit"`. Its `selections` field is the result:
 
@@ -138,7 +146,7 @@ Items without an explicit choice are omitted. Use the result to ask the user whi
 | Wishlist file missing | Tell the user, exit. |
 | Malformed JSON | Show parse error + line. Suggest validating with `jq .`. |
 | Visual-companion server fails to start | Report the error. Offer terminal mode as fallback. |
-| User closes browser without Submit | No `submit` event in `$STATE_DIR/events`. Ask whether to retry or switch to terminal. |
+| User closes browser without Submit | The `Monitor`/`Bash` until-loop never exits. Set a generous timeout (e.g. 30 min) so the wait can be cancelled and the user can retry or switch to terminal. |
 | Multiple `submit` events | Use the last one. Submit is the commit. |
 | `priority` events but no `submit` | Treat as no result. Don't reconstruct the final state from `priority` events. |
 
