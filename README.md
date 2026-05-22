@@ -18,7 +18,7 @@ A Claude Code / agent skill for driving a **Homey Pro** smart-home hub through t
 - ✅ **10-point validation checklist** before every flow push
 - 🛡️ **Guardrails**: risk tiers, active-Homey check, `broken: false` distrust, backup-before-update
 - 🔁 **Drop-in MCP replacement**: all 19 public `mcp__claude_ai_Homey__*` tools have a CLI equivalent
-- 📋 **Wishlist picker**: browse a project's `WISHLIST.md` / `wishlist.json` in a browser UI (filters, status tags, want/maybe/skip/done) or via terminal `AskUserQuestion`; agent auto-continues on submit
+- 💡 **Flow suggestions**: ask *"suggest flows"* / *"wat kan ik automatiseren"* — the agent generates ideas from your device inventory and shows them in a browser picker (filters, status tags, want/maybe/skip/done) or terminal multi-select; agent auto-continues on submit and can build the picked flows next
 
 See [What the skill can do](#what-the-skill-can-do) below for the long version.
 
@@ -125,13 +125,18 @@ Six capabilities, grouped by risk tier (Safe / Medium / High):
 - **HomeyScript**: JS that runs server-side on Homey, for logic flows can't express. Decision tree in `references/homeyscript.md` gates appropriateness; 3 templates included.
 - **Token-mode**: bypass cloud and hit the Homey directly over LAN with a bearer token.
 
-### 6. Wishlist picker (Safe)
-- Browse a project-local wishlist (`wishlist.json` or `WISHLIST.md`) and mark priorities the agent should pick up.
-- **Browser mode**: rich UI (filters per category/status, search, want/maybe/skip/done per item) served via the `superpowers:brainstorming` visual-companion server. Best for long wishlists or thorough triage.
-- **Terminal mode**: `AskUserQuestion` with `multiSelect` directly in chat. No browser, no server. Best for quick passes.
+### 6. Flow suggestions (Safe)
+- Surface flow ideas and let you pick which to build. Three sources:
+  - **Agent-generated** — say *"suggest flows"* / *"wat kan ik automatiseren"* and the agent generates ideas from your device inventory + existing flows.
+  - `wishlist.json` in your project — structured items the agent reads directly.
+  - `WISHLIST.md` in your project — light markdown convention (`## Category` + `- **Title** — desc`).
+- **Browser mode**: rich UI (filters per category/status, search, want/maybe/skip/done per item) served via the `superpowers:brainstorming` visual-companion server. Best for ≥6 items or thorough triage.
+- **Terminal mode**: `AskUserQuestion` with `multiSelect` directly in chat. No browser, no server. Best for ≤6 items or quick passes.
 - **Auto-continue**: after submit the agent picks up the selection without you typing in terminal (fallback: just tell the agent you submitted).
-- Both modes produce the same `{id, choice}` shape, so the agent's follow-up ("which one first?") is identical.
-- Workflow + JSON schema + markdown parsing convention + event contract: `references/wishlist-picker.md`.
+- **Follow-through**: agent's natural next step is to build the picked flows via Capability 3 (one at a time, with confirmation).
+- Triggers, inventory query patterns, JSON schema, markdown parsing, event contract: `references/flow-suggestions.md`.
+
+![Flow suggestions picker — browser mode](assets/wishlist-picker/screenshot.png)
 
 ### What it replaces
 
@@ -157,12 +162,13 @@ references/
   recipes.md                        # backup, audit, bulk ops
   pitfalls.md                       # active-Homey discipline, broken:false trap, etc.
   mcp-migration.md                  # 19-tool MCP → CLI mapping
-  wishlist-picker.md                # wishlist picker workflow (browser + terminal modes)
+  flow-suggestions.md               # flow-suggestions workflow (triggers, generation, browser + terminal modes)
 assets/
   flow-templates/                   # 4 ready-to-customize flow skeletons
   flow-templates/card-primitives/   # 8 minimal card fragments
   homeyscript-templates/            # 3 minimal scripts
   wishlist-picker/template.html     # self-contained picker UI for browser mode
+  wishlist-picker/screenshot.png    # README screenshot of the picker UI
 ```
 
 ## Contributing
