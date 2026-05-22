@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Homey Wishlist</title>
+<style>
+  :root {
+    --bg: #0b1020;
+    --panel: #131a32;
+    --panel-2: #1a2245;
+    --line: #243056;
+    --text: #e6ecff;
+    --muted: #8895c4;
+    --accent: #7c9cff;
+    --accent-2: #5bd1c9;
+    --green: #4ade80;
+    --amber: #fbbf24;
+    --red: #f87171;
+    --chip-bg: #1f2a55;
+  }
+  [data-theme="light"] {
+    --bg: #f6f7fb;
+    --panel: #ffffff;
+    --panel-2: #f1f3f9;
+    --line: #e3e7f2;
+    --text: #0b1020;
+    --muted: #5b6478;
+    --accent: #3756d6;
+    --accent-2: #0e9488;
+    --chip-bg: #eef1fa;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 24px 28px 14px; border-bottom: 1px solid var(--line); background: linear-gradient(180deg, var(--panel) 0%, var(--bg) 100%); position: sticky; top: 0; z-index: 10; }
+  .header-row { display: flex; align-items: center; gap: 16px; }
+  h1 { margin: 0; font-size: 22px; flex: 1; }
+  .submit-btn { background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: 10px 18px; font: inherit; font-weight: 600; cursor: pointer; }
+  .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .toggle-theme { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 9px 14px; font: inherit; cursor: pointer; }
+  .sub { color: var(--muted); margin-top: 4px; font-size: 13px; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px; }
+  .stat { background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .stat .n { font-size: 20px; font-weight: 700; }
+  .stat .l { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+  main { padding: 18px 28px 80px; max-width: 1300px; margin: 0 auto; }
+  .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 12px 0 18px; }
+  .toolbar input[type="search"], .toolbar select { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; font: inherit; }
+  .toolbar input[type="search"] { min-width: 220px; }
+  .chip-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip { background: var(--chip-bg); color: var(--text); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: 13px; cursor: pointer; user-select: none; }
+  .chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .chip.status-buildable { color: var(--green); }
+  .chip.status-partial { color: var(--amber); }
+  .chip.status-blocked { color: var(--red); }
+  .chip.active.status-buildable, .chip.active.status-partial, .chip.active.status-blocked { color: #fff; }
+  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 10px; transition: transform .12s, border-color .12s; }
+  .card:hover { border-color: var(--accent); }
+  .card.priority-want { border-color: var(--green); box-shadow: 0 0 0 1px var(--green) inset; }
+  .card.priority-skip { opacity: 0.45; }
+  .card.priority-done { opacity: 0.5; text-decoration: line-through; }
+  .card-head { display: flex; gap: 8px; align-items: flex-start; justify-content: space-between; }
+  .card-id { color: var(--muted); font-size: 12px; font-family: ui-monospace, monospace; }
+  .card-title { font-weight: 600; font-size: 16px; margin: 0; }
+  .card-desc { color: var(--muted); font-size: 14px; }
+  .card-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; }
+  .tag { font-size: 11px; padding: 3px 8px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--line); color: var(--muted); }
+  .tag.status-buildable { color: var(--green); border-color: rgba(74,222,128,0.35); }
+  .tag.status-partial { color: var(--amber); border-color: rgba(251,191,36,0.35); }
+  .tag.status-blocked { color: var(--red); border-color: rgba(248,113,113,0.35); }
+  .devices { font-size: 12px; color: var(--muted); }
+  .devices b { color: var(--text); font-weight: 500; }
+  .actions { display: flex; gap: 6px; margin-top: 6px; }
+  .actions button { flex: 1; background: var(--panel-2); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; font: inherit; font-size: 12px; cursor: pointer; }
+  .actions button.on[data-action="want"]  { background: rgba(74,222,128,0.18); border-color: var(--green); color: var(--green); }
+  .actions button.on[data-action="maybe"] { background: rgba(251,191,36,0.18); border-color: var(--amber); color: var(--amber); }
+  .actions button.on[data-action="skip"]  { background: rgba(248,113,113,0.15); border-color: var(--red); color: var(--red); }
+  .actions button.on[data-action="done"]  { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .overlay { position: fixed; inset: 0; background: rgba(11,16,32,0.85); display: none; align-items: center; justify-content: center; z-index: 100; }
+  .overlay.show { display: flex; }
+  .overlay-card { background: var(--panel); border: 1px solid var(--green); border-radius: 14px; padding: 28px 36px; text-align: center; }
+  .overlay-card h2 { margin: 0 0 6px; color: var(--green); }
+  .overlay-card p { margin: 0; color: var(--muted); }
+  @media (max-width: 700px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    header, main { padding-left: 14px; padding-right: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-row">
+    <h1>Homey Wishlist</h1>
+    <button class="submit-btn" id="submitBtn" disabled>Submit &amp; close</button>
+    <button class="toggle-theme" id="themeBtn">Light / dark</button>
+  </div>
+  <div class="sub">Pick priorities per item, then click Submit to return to the agent.</div>
+  <div class="stats" id="stats"></div>
+</header>
+
+<main>
+  <div class="toolbar">
+    <input id="search" type="search" placeholder="Search (title, device, idea)…" />
+    <select id="category"><option value="">All categories</option></select>
+    <select id="priority">
+      <option value="">All priorities</option>
+      <option value="want">Want</option>
+      <option value="maybe">Maybe</option>
+      <option value="skip">Skip</option>
+      <option value="done">Done</option>
+      <option value="none">No priority</option>
+    </select>
+    <div class="chip-row" id="statusChips">
+      <button class="chip active" data-status="">All</button>
+      <button class="chip status-buildable" data-status="buildable">● Buildable now</button>
+      <button class="chip status-partial"   data-status="partial">● Partial</button>
+      <button class="chip status-blocked"   data-status="blocked">● Device needed</button>
+    </div>
+  </div>
+
+  <div id="grid" class="grid"></div>
+  <div id="empty" class="empty" hidden>No items match the filters.</div>
+</main>
+
+<div class="overlay" id="overlay">
+  <div class="overlay-card">
+    <h2>Submitted</h2>
+    <p>Return to the terminal — the agent has your selection.</p>
+  </div>
+</div>
+
+<script>
+const IDEAS = __WISHLIST_DATA__;
+
+const state = {
+  search: "",
+  category: "",
+  status: "",
+  priority: "",
+  priorities: {},
+  submitted: false,
+};
+
+function statusLabel(s) {
+  return { buildable: "Buildable now", partial: "Partial", blocked: "Device needed" }[s] || null;
+}
+
+function setPriority(id, val) {
+  if (state.priorities[id] === val) delete state.priorities[id];
+  else state.priorities[id] = val;
+  if (window.brainstorm && !state.submitted) {
+    window.brainstorm.send({ type: "priority", id: id, choice: state.priorities[id] || null });
+  }
+  render();
+}
+
+function renderStats() {
+  const total = IDEAS.length;
+  const buildable = IDEAS.filter(i => i.status === "buildable").length;
+  const partial = IDEAS.filter(i => i.status === "partial").length;
+  const blocked = IDEAS.filter(i => i.status === "blocked").length;
+  const want = Object.values(state.priorities).filter(p => p === "want").length;
+  const done = Object.values(state.priorities).filter(p => p === "done").length;
+  let html = `
+    <div class="stat"><div class="n">${total}</div><div class="l">Total ideas</div></div>
+    <div class="stat"><div class="n" style="color:var(--green)">${buildable}</div><div class="l">Buildable now</div></div>
+    <div class="stat"><div class="n" style="color:var(--amber)">${partial}</div><div class="l">Partial</div></div>
+    <div class="stat"><div class="n" style="color:var(--red)">${blocked}</div><div class="l">Device needed</div></div>`;
+  if (want || done) {
+    html += `<div class="stat" style="grid-column: span 2"><div class="n" style="color:var(--accent)">${want} want · ${done} done</div><div class="l">Your priorities</div></div>`;
+  }
+  document.getElementById("stats").innerHTML = html;
+}
+
+function fillCategoryDropdown() {
+  const cats = [...new Set(IDEAS.map(i => i.category).filter(Boolean))].sort();
+  const sel = document.getElementById("category");
+  cats.forEach(c => {
+    const o = document.createElement("option");
+    o.value = c; o.textContent = c;
+    sel.appendChild(o);
+  });
+}
+
+function matches(idea) {
+  if (state.status && idea.status !== state.status) return false;
+  if (state.category && idea.category !== state.category) return false;
+  const p = state.priorities[idea.id];
+  if (state.priority === "none" && p) return false;
+  if (state.priority && state.priority !== "none" && p !== state.priority) return false;
+  if (state.search) {
+    const q = state.search.toLowerCase();
+    const devicesStr = (idea.devices || []).join(" ");
+    const hay = (idea.title + " " + (idea.desc || "") + " " + devicesStr + " " + (idea.category || "")).toLowerCase();
+    if (!hay.includes(q)) return false;
+  }
+  return true;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+function renderGrid() {
+  const grid = document.getElementById("grid");
+  const visible = IDEAS.filter(matches);
+  document.getElementById("empty").hidden = visible.length > 0;
+  grid.innerHTML = visible.map(idea => {
+    const prio = state.priorities[idea.id] || "";
+    const status = idea.status;
+    const statusTag = statusLabel(status)
+      ? `<span class="tag status-${status}">● ${statusLabel(status)}</span>`
+      : "";
+    const idLabel = String(idea.id);
+    const catLabel = idea.category ? ` · ${escapeHtml(idea.category)}` : "";
+    const devicesLine = (idea.devices && idea.devices.length)
+      ? `<div class="devices"><b>Devices:</b> ${escapeHtml(idea.devices.join(", "))}</div>`
+      : "";
+    const desc = idea.desc ? `<div class="card-desc">${escapeHtml(idea.desc)}</div>` : "";
+    return `
+      <div class="card ${prio ? "priority-" + prio : ""}">
+        <div class="card-head">
+          <div>
+            <div class="card-id">#${escapeHtml(idLabel)}${catLabel}</div>
+            <h3 class="card-title">${escapeHtml(idea.title)}</h3>
+          </div>
+          ${statusTag}
+        </div>
+        ${desc}
+        ${devicesLine}
+        <div class="actions" data-id="${escapeHtml(idLabel)}">
+          <button data-action="want"  class="${prio === "want"  ? "on" : ""}">★ Want</button>
+          <button data-action="maybe" class="${prio === "maybe" ? "on" : ""}">? Maybe</button>
+          <button data-action="skip"  class="${prio === "skip"  ? "on" : ""}">✕ Skip</button>
+          <button data-action="done"  class="${prio === "done"  ? "on" : ""}">✓ Done</button>
+        </div>
+      </div>`;
+  }).join("");
+
+  grid.querySelectorAll(".actions").forEach(el => {
+    const rawId = el.dataset.id;
+    const id = isNaN(+rawId) ? rawId : +rawId;
+    el.querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", () => setPriority(id, btn.dataset.action));
+    });
+  });
+}
+
+function updateSubmitButton() {
+  document.getElementById("submitBtn").disabled = Object.keys(state.priorities).length === 0;
+}
+
+function render() {
+  renderStats();
+  renderGrid();
+  updateSubmitButton();
+}
+
+function setupToolbar() {
+  document.getElementById("search").addEventListener("input", e => { state.search = e.target.value; render(); });
+  document.getElementById("category").addEventListener("change", e => { state.category = e.target.value; render(); });
+  document.getElementById("priority").addEventListener("change", e => { state.priority = e.target.value; render(); });
+  document.querySelectorAll("#statusChips .chip").forEach(c => {
+    c.addEventListener("click", () => {
+      document.querySelectorAll("#statusChips .chip").forEach(x => x.classList.remove("active"));
+      c.classList.add("active");
+      state.status = c.dataset.status;
+      render();
+    });
+  });
+}
+
+function setupTheme() {
+  document.getElementById("themeBtn").addEventListener("click", () => {
+    const isLight = document.documentElement.getAttribute("data-theme") === "light";
+    if (isLight) document.documentElement.removeAttribute("data-theme");
+    else document.documentElement.setAttribute("data-theme", "light");
+  });
+}
+
+function setupSubmit() {
+  document.getElementById("submitBtn").addEventListener("click", () => {
+    if (state.submitted) return;
+    state.submitted = true;
+    if (window.brainstorm) {
+      window.brainstorm.send({ type: "submit", choice: "submit", selections: { ...state.priorities } });
+    }
+    document.getElementById("overlay").classList.add("show");
+  });
+}
+
+fillCategoryDropdown();
+setupToolbar();
+setupTheme();
+setupSubmit();
+render();
+</script>
+</body>
+</html>

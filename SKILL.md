@@ -170,6 +170,23 @@ homey api raw -X POST --path /api/manager/<m>/<e> --body @payload.json
 
 If a flow cannot express the logic, HomeyScript is available. **Always check first if a flow can do it.** Start at `references/homeyscript.md` — it begins with a decision tree that gates whether HomeyScript is appropriate.
 
+## Capability 6 — Wishlist picker
+
+Browse a project's wishlist (`wishlist.json` or `WISHLIST.md` in cwd) and let the user mark priorities. Two modes:
+
+- **Browser** — Reuses the `superpowers:brainstorming` visual-companion server. Rich UI with filters, status tags, devices, and four priority levels per item (Want / Maybe / Skip / Done). Best for long wishlists or thorough triage.
+- **Terminal** — `AskUserQuestion` (multiSelect) directly in chat. No browser, no server. Best for quick passes.
+
+Mode selection: honor explicit triggers ("browser", "terminal", "quickly"); otherwise ask once via `AskUserQuestion`. No auto-heuristic.
+
+Both modes produce the same internal shape:
+
+```json
+{ "selections": [ {"id": 1, "choice": "want"}, {"id": 7, "choice": "maybe"} ] }
+```
+
+Step-by-step workflow, JSON schema, markdown parsing convention, failure modes, and the event contract for the browser template: `references/wishlist-picker.md`.
+
 ## Risk tiers
 
 | Tier | Examples | Required steps |
@@ -206,6 +223,8 @@ Beyond the MCP, this skill also covers: raw API to ~50 managers, app inventory w
 | `references/recipes.md` | Ready-to-paste snippets — backup, audit, bulk ops, search |
 | `references/pitfalls.md` | Active-Homey discipline, broken:false trap, jq quirks, risk-tier table |
 | `references/mcp-migration.md` | Full 19-tool MCP → CLI mapping |
+| `references/wishlist-picker.md` | Wishlist picker workflow (browser + terminal modes), JSON schema, event contract |
 | `assets/flow-templates/*.json` | 4 ready-to-customize flow skeletons (standard, simple advanced, conditional, with-control) |
 | `assets/flow-templates/card-primitives/*.json` | 8 minimal card fragments — one per advanced-flow card type |
 | `assets/homeyscript-templates/*.js` | 3 minimal scripts (condition, trigger-with-tags, safe capability read) |
+| `assets/wishlist-picker/template.html` | Self-contained picker UI; `__WISHLIST_DATA__` placeholder substituted by the agent |
