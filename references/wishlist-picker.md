@@ -89,7 +89,7 @@ pathlib.Path('$SCREEN_DIR/wishlist.html').write_text(tpl.replace('__WISHLIST_DAT
 
 ### 4. Wait for the submit event (auto-continue)
 
-Tell the user the URL and what to do ("click priorities, then Submit"), then block until the submit event appears. Do **not** end the turn — the agent continues automatically as soon as the user clicks Submit.
+Tell the user the URL, what to do ("click priorities, then Submit"), **and the fallback**: *"if I don't continue automatically after you click Submit, just say 'submitted' (or anything similar) and I'll pick it up."* Then block until the submit event appears — do not end the turn.
 
 Use `Monitor` (or `Bash` with `run_in_background: true`) on this until-loop:
 
@@ -98,6 +98,8 @@ until grep -q '"type":"submit"' "$STATE_DIR/events" 2>/dev/null; do sleep 2; don
 ```
 
 The loop exits the moment the submit event is written to disk. The runtime notifies the agent and the next step runs.
+
+If the auto-notify fails (background process not picked up, hook blocked, etc.) the user will tell you they submitted. In that case skip the wait and proceed to step 5.
 
 ### 5. Read the result
 
