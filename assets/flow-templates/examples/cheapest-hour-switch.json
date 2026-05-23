@@ -1,0 +1,54 @@
+{
+  "name": "TODO: Run appliance during cheapest hour",
+  "enabled": true,
+  "cards": {
+    "11111111-1111-4111-8111-111111111111": {
+      "type": "trigger",
+      "id": "homey:app:com.gruijter.powerhour:cheapest_hour_starts",
+      "args": { "hours": "8" },
+      "x": 100,
+      "y": 300,
+      "outputSuccess": ["22222222-2222-4222-8222-222222222222"]
+    },
+    "22222222-2222-4222-8222-222222222222": {
+      "type": "condition",
+      "id": "homey:manager:logic:variable_boolean_is",
+      "args": {
+        "variable": { "id": "TODO_LOGIC_VAR_ID_appliance_queued" },
+        "value": true
+      },
+      "x": 500,
+      "y": 300,
+      "outputTrue": ["33333333-3333-4333-8333-333333333333"]
+    },
+    "33333333-3333-4333-8333-333333333333": {
+      "type": "action",
+      "id": "homey:device:TODO_APPLIANCE_ID:onoff:true",
+      "args": {},
+      "x": 900,
+      "y": 200,
+      "outputSuccess": ["44444444-4444-4444-8444-444444444444"]
+    },
+    "44444444-4444-4444-8444-444444444444": {
+      "type": "delay",
+      "x": 1200,
+      "y": 200,
+      "args": { "delay": { "number": "60", "multiplier": 60 } },
+      "outputSuccess": ["55555555-5555-4555-8555-555555555555"]
+    },
+    "55555555-5555-4555-8555-555555555555": {
+      "type": "action",
+      "id": "homey:device:TODO_APPLIANCE_ID:onoff:false",
+      "args": {},
+      "x": 1500,
+      "y": 200
+    },
+    "66666666-6666-4666-8666-666666666666": {
+      "type": "note",
+      "x": 100,
+      "y": 600,
+      "value": "Trigger comes from Power-by-the-Hour app (com.gruijter.powerhour). Don't hardcode a time — the cheapest hour shifts day to day. Use a Logic boolean as a queue/arming flag so the trigger doesn't auto-run when you don't want it.",
+      "color": "yellow"
+    }
+  }
+}

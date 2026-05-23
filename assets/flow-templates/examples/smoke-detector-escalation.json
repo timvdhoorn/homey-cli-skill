@@ -1,0 +1,77 @@
+{
+  "name": "TODO: Smoke detector escalation",
+  "enabled": true,
+  "cards": {
+    "11111111-1111-4111-8111-111111111111": {
+      "type": "trigger",
+      "id": "homey:device:TODO_SMOKE_DEVICE_ID:alarm_smoke_true",
+      "args": {},
+      "x": 100,
+      "y": 300,
+      "outputSuccess": [
+        "22222222-2222-4222-8222-222222222222",
+        "33333333-3333-4333-8333-333333333333"
+      ]
+    },
+    "22222222-2222-4222-8222-222222222222": {
+      "type": "action",
+      "id": "homey:manager:flow:start-a-flow",
+      "args": {
+        "flow": { "id": "TODO_LIGHTS_RED_BLINK_FLOW_ID" }
+      },
+      "x": 500,
+      "y": 150
+    },
+    "33333333-3333-4333-8333-333333333333": {
+      "type": "action",
+      "id": "homey:app:nl.nielsdeklerk.log:log",
+      "args": {
+        "group": "alarm",
+        "severity": "crit",
+        "message": "Smoke detected — escalating"
+      },
+      "x": 500,
+      "y": 450
+    },
+    "44444444-4444-4444-8444-444444444444": {
+      "type": "condition",
+      "id": "homey:manager:logic:is_night",
+      "args": {},
+      "x": 900,
+      "y": 300,
+      "outputTrue": ["55555555-5555-4555-8555-555555555555"],
+      "outputFalse": ["66666666-6666-4666-8666-666666666666"]
+    },
+    "55555555-5555-4555-8555-555555555555": {
+      "type": "action",
+      "id": "homey:manager:speech-output:say",
+      "args": { "text": "Smoke detected! Wake up." },
+      "x": 1300,
+      "y": 150
+    },
+    "66666666-6666-4666-8666-666666666666": {
+      "type": "action",
+      "id": "homey:manager:mobile:push_text",
+      "args": { "text": "Smoke detected at home." },
+      "x": 1300,
+      "y": 450
+    },
+    "77777777-7777-4777-8777-777777777777": {
+      "type": "all",
+      "x": 700,
+      "y": 300,
+      "input": [
+        "22222222-2222-4222-8222-222222222222::outputSuccess",
+        "33333333-3333-4333-8333-333333333333::outputSuccess"
+      ],
+      "outputSuccess": ["44444444-4444-4444-8444-444444444444"]
+    },
+    "88888888-8888-4888-8888-888888888888": {
+      "type": "note",
+      "x": 100,
+      "y": 700,
+      "value": "Trigger fan-out: lights branch + log branch run in parallel, ALL gate before time-of-day check. Replace TODO_* IDs; verify card IDs via get-flow-card-* before pushing. Wire 'lights red blink' as its own flow so escalation is independent.",
+      "color": "yellow"
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "name": "TODO: House modes — setter at sunset",
+  "enabled": true,
+  "cards": {
+    "11111111-1111-4111-8111-111111111111": {
+      "type": "trigger",
+      "id": "homey:manager:logic:sun_event",
+      "args": { "event": "set" },
+      "x": 100,
+      "y": 200,
+      "outputSuccess": ["22222222-2222-4222-8222-222222222222"]
+    },
+    "22222222-2222-4222-8222-222222222222": {
+      "type": "condition",
+      "id": "homey:manager:logic:variable_text_is",
+      "args": {
+        "variable": { "id": "TODO_LOGIC_VAR_ID_house_mode" },
+        "value": "away"
+      },
+      "x": 500,
+      "y": 200,
+      "outputFalse": ["33333333-3333-4333-8333-333333333333"]
+    },
+    "33333333-3333-4333-8333-333333333333": {
+      "type": "action",
+      "id": "homey:manager:logic:set_variable_text",
+      "args": {
+        "variable": { "id": "TODO_LOGIC_VAR_ID_house_mode" },
+        "value": "evening"
+      },
+      "x": 900,
+      "y": 200
+    },
+    "44444444-4444-4444-8444-444444444444": {
+      "type": "note",
+      "x": 100,
+      "y": 450,
+      "value": "MODE SETTER. One per mode-entry condition (time, presence, button). Reads current mode and only overrides modes lower in priority (here: don't override 'away' with 'evening'). Mode REACTORS (separate flows) trigger on variable_text_changed and fan out — dim lights, arm Heimdall, set thermostat profile, etc. Don't put mode logic into every behavioural flow.",
+      "color": "yellow"
+    }
+  }
+}

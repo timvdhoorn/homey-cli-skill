@@ -29,6 +29,8 @@ Submit a PR or open an issue if you want to pick one up.
 - **Standard vs. advanced vs. HomeyScript decision matrix** — When to use which.
 - **Advanced-flow primitives diagram** — Visual of `AND` / `OR` / `Note` / `Delay` / `Start Flow` and how `outputTrue` / `outputFalse` / `outputSuccess` / `outputError` wire them.
 - **Migration notes beyond the MCP table** — For users coming from the deprecated public Homey MCP.
+- **Companion-app card cheatsheets** — Device Capabilities, Chronograph, Advanced Triggers, Simple Log: top 5 cards each with arg shapes. Currently mentioned in `community-patterns.md` but not enumerated.
+- **Flow Exchanger import tool** — Reusable script that decodes `H4sIAAAA…` strings into `create-advanced-flow`-compatible JSON.
 
 ---
 

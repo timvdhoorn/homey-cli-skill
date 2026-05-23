@@ -128,6 +128,10 @@ The 8-step workflow below is the spine of this skill. Follow it in order — eve
 - ❌ Run `update-…-flow` without a backup — it overwrites silently.
 - ❌ Push without ticking every validation-checklist item.
 
+### Before designing from scratch, check the community pattern library
+
+`references/community-patterns.md` documents recurring shapes the Homey community has settled on — motion + sun-window light, cancellable off-timers, smoke escalation, cheapest-hour switching, two-door hallway, shared event bus via Advanced Triggers, centralised notification pipelines. Each entry names the companion app it relies on (Device Capabilities, Chronograph, Advanced Triggers, Simple Log) and points to a worked-example template in `assets/flow-templates/examples/`. Decode `H4sIAAAA…` Flow Exchanger strings the user pastes via the same reference.
+
 ## Capability 4 — Control state
 
 Reversible state changes. Medium tier (see Risk tiers): announce before run.
@@ -229,10 +233,12 @@ Beyond the MCP, this skill also covers: raw API to ~50 managers, app inventory w
 | `references/flow-json-schema.md` | Authoritative JSON shape (advanced + standard), 10-point validation checklist, round-trip workflow, template usage |
 | `references/homeyscript.md` | Decision tree (when not to use HomeyScript), CRUD, template walkthrough |
 | `references/recipes.md` | Ready-to-paste snippets — backup, audit, bulk ops, search |
-| `references/pitfalls.md` | Active-Homey discipline, broken:false trap, jq quirks, risk-tier table |
+| `references/pitfalls.md` | Active-Homey discipline, broken:false trap, jq quirks, sun-offset / delay / any-all gotchas, risk-tier table |
+| `references/community-patterns.md` | Recurring advanced-flow patterns observed in the Homey community + Flow Exchanger format reference |
 | `references/mcp-migration.md` | Full 19-tool MCP → CLI mapping |
 | `references/flow-suggestions.md` | Flow suggestions workflow (triggers, generation, browser + terminal modes), JSON schema, event contract |
 | `assets/flow-templates/*.json` | 4 ready-to-customize flow skeletons (standard, simple advanced, conditional, with-control) |
+| `assets/flow-templates/examples/*.json` | 6 community-pattern worked examples — house-modes setter, motion+sun-window, cancellable off-timer, smoke-detector escalation, cheapest-hour switch, two-door hallway light |
 | `assets/flow-templates/card-primitives/*.json` | 8 minimal card fragments — one per advanced-flow card type |
 | `assets/homeyscript-templates/*.js` | 3 minimal scripts (condition, trigger-with-tags, safe capability read) |
 | `assets/wishlist-picker/template.html` | Self-contained flow-suggestions picker UI; `__WISHLIST_DATA__` placeholder substituted by the agent |

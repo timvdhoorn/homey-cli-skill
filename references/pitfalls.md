@@ -14,6 +14,16 @@ Gotchas observed in practice while using the Homey CLI. Read this when troublesh
 - [Token-mode for direct IP access](#token-mode-for-direct-ip-access)
 - [Update silently overwrites — always back up](#update-silently-overwrites--always-back-up)
 - [Self-resetting relays — pulse with `:on`, not `:on` + `:off`](#self-resetting-relays--pulse-with-on-not-on--off)
+- [Sun-offset triggers fire **once**, not during a window](#sun-offset-triggers-fire-once-not-during-a-window)
+- [`delay` cards can't be cancelled mid-flight](#delay-cards-cant-be-cancelled-mid-flight)
+- [`any`/`all` `input[]` need the `::outputSuccess` suffix](#anyall-input-need-the-outputsuccess-suffix)
+- ["Enkel" in the UI is `"type": "any"`](#enkel-in-the-ui-is-type-any)
+- [Action arguments shouldn't depend on the triggering device](#action-arguments-shouldnt-depend-on-the-triggering-device)
+- [Flow Exchanger strings aren't the same schema as `create-advanced-flow`](#flow-exchanger-strings-arent-the-same-schema-as-create-advanced-flow)
+- ["Before sunset" / "Before sunrise" mean window, not earlier-than](#before-sunset--before-sunrise-mean-window-not-earlier-than)
+- [`AND`-push confirm cards are fragile on Android](#and-push-confirm-cards-are-fragile-on-android)
+- [Voice assistants only see standard, favorited flows](#voice-assistants-only-see-standard-favorited-flows)
+- [Spontaneous flow firing is almost always device-side automation](#spontaneous-flow-firing-is-almost-always-device-side-automation)
 - [Risk tiers](#risk-tiers)
 
 ## Active-Homey discipline
@@ -131,6 +141,110 @@ Some devices (notably **Shelly** sockets and most garage-door / impulse relays) 
 2. **`onoff` gives no feedback about the load.** A garage motor that fails to move still reports `onoff: false` once the relay drops. Don't condition follow-up logic on the device's capability state; if you need real position feedback, use a separate door / contact sensor.
 
 Worked example: `flows/garagedeur-pakketmodus.md` (in this project's repo) chains three `:on` actions on a Shelly socket without any `:off` and works reliably.
+
+## Sun-offset triggers fire **once**, not during a window
+
+The card "When the sun sets in N minutes" (`is_sun_event_in` / similar) is a **trigger**: it fires once at `sunset - N`. People consistently mistake it for "during the hour before sunset" and put it as the entry of an AND gate with a motion sensor — which then dead-locks unless motion happens within milliseconds of that single instant.
+
+**Right pattern:** trigger on the activity (motion, button, presence), put the time-window as a **condition** card (`is_sun_event_between` with offsets). Worked example: `assets/flow-templates/examples/motion-sun-window-light.json`. Recurring in the community — see `references/community-patterns.md`.
+
+## `delay` cards can't be cancelled mid-flight
+
+Once a `delay` card emits, the downstream action will fire even if the conditions that placed the flow there reverse. Concretely: motion triggers `delay 60s → light off`. New motion arrives at second 30. The light still goes off at second 60 — there is no native "cancel pending delay" card.
+
+**Right pattern:** named, cancellable timers via the Chronograph app (`start_timer` re-arms a same-named timer, `stop_timer` cancels it). Worked example: `assets/flow-templates/examples/cancellable-off-timer.json`.
+
+If Chronograph isn't installed, fake it with a Logic boolean and an `is_unchanged_for` condition — uglier but works without dependencies.
+
+## `any`/`all` `input[]` need the `::outputSuccess` suffix
+
+The synchronisation cards reference upstream cards by **port**, not by card id:
+
+```json
+"input": [
+  "<source-uuid>::outputSuccess",
+  "<source-uuid>::outputTrue"
+]
+```
+
+A bare UUID without `::outputName` is accepted by `create-advanced-flow` but the gate never resolves at runtime — the flow appears healthy in the editor and silently does nothing. Output names are `outputSuccess`, `outputTrue`, `outputFalse`, `outputError`.
+
+## "Enkel" in the UI is `"type": "any"`
+
+The Dutch UI label "Enkel" (English "Only") corresponds to JSON `"type": "any"`, not `"only"`. The most common typo when hand-writing advanced-flow JSON. The validator accepts `"only"` (silently treated as unknown type), the runtime ignores the card, and the gate downstream of it never fires.
+
+Same trap inverted: `"type": "all"` is **not** the UI's "AND" — `all` is a join node that waits for every input branch. The And-card (condition) is `"type": "condition"`.
+
+## Action arguments shouldn't depend on the triggering device
+
+A surprisingly common community footgun: an alarm flow's action card pulls a token (volume, target, message text) from the **device that caused the trigger**. When that device fails (dead battery, lost Zigbee link), the trigger never fires *and* the action arg can't resolve when it does — the action either no-ops or errors silently.
+
+**Right pattern:** pull action arguments from neutral sources — Logic variables, a dedicated config flow, a separator/delay node that re-resolves. The smoke-detector escalation thread is the canonical example: route the alarm into a `Simple Log` event with severity, dispatch in a separate flow that pulls volume / target from its own variables.
+
+See `references/community-patterns.md#pattern-smoke--alarm-escalation`.
+
+## Flow Exchanger strings aren't the same schema as `create-advanced-flow`
+
+Strings shared in the community starting with `H4sIAAAA…` are gzip+base64-encoded JSON, but the embedded schema is the **compacted** Flow Exchanger form (`{u, a, c, i, n, e, …}`) — not the full advanced-flow JSON. Decoding gives you something like:
+
+```json
+{ "u": { "<uuid>": { "n": "Author Name" } },
+  "a": [ { "i": "<uuid>", "n": "Flow name", "e": true,
+           "c": { "<uuid>": { "x": 0, "y": 100, "o": "homey:manager:mobile",
+                              "i": "push_text", "t": "action", "a": {} } } } ] }
+```
+
+`homey api flow create-advanced-flow --body` rejects this directly — it needs the full schema (see `flow-json-schema.md`). Translation rules: `c → cards`, `t → type`, `i → id` (or card id depending on context), `o → ownerUri` (often merged into `id`), `a → args`, `x/y → x/y`.
+
+When the user pastes such a string, decode and explicitly translate before pushing. Don't blindly forward.
+
+## "Before sunset" / "Before sunrise" mean window, not earlier-than
+
+The Logic time-condition cards `is_before_sunset` and `is_before_sunrise` describe a **window**, not an instant comparison:
+
+- `is_before_sunrise` is true between sunset and sunrise (i.e. "during the night").
+- `is_before_sunset` is true between sunrise and sunset (i.e. "during daylight").
+
+A flow that reads "AND it's before sunrise AND it's before sunset" via OR is true 24/7 and fires all night. The community recurringly reads these as "the current time is earlier than today's sunrise" — it isn't.
+
+**Right pattern:** single `is_sun_event_between` card with explicit offsets, or two `is_after`/`is_before` cards combined with a single AND. See [how-homey-implements-sunset-and-sunrise/151358](https://community.homey.app/t/how-homey-implements-sunset-and-sunrise/151358).
+
+## `AND`-push confirm cards are fragile on Android
+
+The "Push notification (CONFIRM)" condition card asks the user a Yes/No via push and continues based on the answer. Recurring report (Samsung Fold 7, Pro 2023): after 2 confirmations the Yes/No buttons stop appearing — the notification arrives but is silent on long-press, app reinstall fixes it for another 2 messages.
+
+**Implication:** do **not** put security-critical decisions ("turn off the alarm? yes/no") behind confirm-push as the only path. Either:
+
+- Confirm via a physical device action (button press, NFC tap, Hue Tap Dial) that posts a separate trigger.
+- Confirm via Homey's voice prompt + Sonos / Google announcement.
+- Send a regular push with a deeplink to a dashboard switch and require the user to flip the switch.
+
+The confirm card is fine for low-stakes prompts ("turn off all lights? yes/no"). Don't put it on the critical path.
+
+Source: [push-notifications-confirm-issue/133080](https://community.homey.app/t/push-notifications-confirm-issue/133080).
+
+## Voice assistants only see standard, favorited flows
+
+Alexa, Google Assistant, and Siri integrations expose **standard flows marked as favorite**, not advanced flows. An advanced flow named "Goodnight" does not appear in Alexa's "Routines" scene picker. Disabling a favorited standard flow doesn't always purge it from Alexa's cache — the user has to re-scan scenes.
+
+Pattern: wrap advanced flows in a thin standard flow `[Virtual Button] → Start a flow → <advanced flow>`, mark as favorite. Virtual Device class matters — `light` and `switch` are reliably recognised; `button` is hit-or-miss.
+
+See `references/community-patterns.md#pattern-voice-assistant--advanced-flow-bridge`.
+
+## Spontaneous flow firing is almost always device-side automation
+
+When the user reports "the light came on but no flow fired" or "the heater turned off but the schedule says it shouldn't have", the cause is almost never a phantom Homey flow. Check first:
+
+1. **Hue Bridge** has its own motion + time routines configured via the Hue app — independent of Homey.
+2. **Philips / IKEA / Aqara hubs** carry their own automations even after pairing to Homey.
+3. **Z-Wave association groups** can wire a motion sensor directly to a light at the device level, bypassing the controller.
+4. **Zigbee Touchlink** sometimes leaves direct bindings between devices.
+5. **The device's own schedule** (most smart thermostats, washing machines, etc.).
+6. Another **flow with `trigger-flow` action** elsewhere — use the Find-Any-Items audit script (see `community-patterns.md#audit-before-refactor-who-references-this-device`).
+
+Disable Homey's flow temporarily; if the behaviour persists, the source is external. This saves hours of "is my flow broken?" debugging.
+
+Source: [licht-gaat-zelf-weer-aan-zonder-flow-beweging/73832](https://community.homey.app/t/licht-gaat-zelf-weer-aan-zonder-flow-beweging/73832).
 
 ## Risk tiers
 

@@ -1,0 +1,41 @@
+{
+  "name": "TODO: Motion + sun-window light",
+  "enabled": true,
+  "cards": {
+    "11111111-1111-4111-8111-111111111111": {
+      "type": "trigger",
+      "id": "homey:device:TODO_MOTION_DEVICE_ID:alarm_motion_true",
+      "args": {},
+      "x": 100,
+      "y": 200,
+      "outputSuccess": ["22222222-2222-4222-8222-222222222222"]
+    },
+    "22222222-2222-4222-8222-222222222222": {
+      "type": "condition",
+      "id": "homey:manager:logic:is_sun_event_between",
+      "args": {
+        "sun_event_a": "set",
+        "offset_a": -60,
+        "sun_event_b": "rise",
+        "offset_b": 0
+      },
+      "x": 500,
+      "y": 200,
+      "outputTrue": ["33333333-3333-4333-8333-333333333333"]
+    },
+    "33333333-3333-4333-8333-333333333333": {
+      "type": "action",
+      "id": "homey:device:TODO_LIGHT_DEVICE_ID:onoff:true",
+      "args": {},
+      "x": 900,
+      "y": 200
+    },
+    "44444444-4444-4444-8444-444444444444": {
+      "type": "note",
+      "x": 100,
+      "y": 400,
+      "value": "Trigger on motion, gate on time-window. Putting a sun-offset card as the trigger only fires once at sunset-60min — almost never useful. Replace IDs from get-flow-card-* and get-devices.",
+      "color": "yellow"
+    }
+  }
+}
