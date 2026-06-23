@@ -24,6 +24,16 @@ See [What the skill can do](#what-the-skill-can-do) below for the long version.
 
 ## Install as a Claude Code skill
 
+### Quickest: `npx skills`
+
+```bash
+npx skills add timvdhoorn/homey-cli-skill
+```
+
+Installs the skill straight from GitHub into your skills folder. Restart Claude Code and you're done. For manual control over the install location, use the git options below.
+
+### Manual install (git)
+
 Claude Code auto-loads any folder matching `<skill-name>/SKILL.md` under one of:
 
 - `~/.claude/skills/<skill-name>/`: available in every project (recommended for personal use)
@@ -31,7 +41,7 @@ Claude Code auto-loads any folder matching `<skill-name>/SKILL.md` under one of:
 
 The folder name **must** be `homey-cli` (matches the `name:` in `SKILL.md` frontmatter).
 
-### Option A: user-level (recommended, all projects)
+#### Option A: user-level (recommended, all projects)
 
 Clone straight into your global Claude Code skills folder:
 
@@ -42,14 +52,14 @@ git clone https://github.com/timvdhoorn/homey-cli-skill.git ~/.claude/skills/hom
 
 Done. Restart Claude Code and the skill is available everywhere.
 
-### Option B: project-level (single project)
+#### Option B: project-level (single project)
 
 ```bash
 mkdir -p /path/to/project/.claude/skills
 git clone https://github.com/timvdhoorn/homey-cli-skill.git /path/to/project/.claude/skills/homey-cli
 ```
 
-### Option C: clone elsewhere + symlink (advanced)
+#### Option C: clone elsewhere + symlink (advanced)
 
 If you want to keep one working copy and link it into multiple locations (e.g. you're hacking on the skill yourself):
 

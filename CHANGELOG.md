@@ -2,6 +2,11 @@
 
 Newest on top. Format: `## YYYY-MM-DD`.
 
+## 2026-06-23
+
+### Changed
+- `README.md`: install section now leads with the one-liner `npx skills add timvdhoorn/homey-cli-skill` as the quickest install path; the git clone methods (Options A/B/C) are grouped under a "Manual install (git)" subsection as fallback.
+
 ## 2026-05-23
 
 ### Added
